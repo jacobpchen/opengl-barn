@@ -3,7 +3,10 @@
 #include "imageloader.h"
 
 float angle = 0;
-GLuint textureBarn, textureDoor, textureGrass, textureRoof, textureWindow, textureSky;  // variables to save bmp
+// variables to save bmp
+GLuint textureBarn, textureDoor, textureGrass, 
+       textureRoof, textureWindow, textureSky,
+       textureHay;  
 
 void setMaterial(GLfloat ambientR, GLfloat ambientG, GLfloat ambientB,
     GLfloat diffuseR, GLfloat diffuseG, GLfloat diffuseB,
@@ -198,6 +201,7 @@ void drawLeftSide() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTranslatef(0, 0, -6);
     glRotatef(angle, 0.0, 1.0, 0.0);
+
     glBegin(GL_QUADS);  // Wall
     glTexCoord3f(0.0, 2.0, 1);    glVertex3f(-2, 0, -1);
     glTexCoord3f(2.0, 2.0, -1);    glVertex3f(-2, 0, -3);
@@ -213,35 +217,79 @@ void drawLeftSide() {
     glPopMatrix();
 }
 
-void drawCart() {
+void drawHay() {
     /*
-    glPushMatrix();
-
-    glPushMatrix();
-    glTranslatef(0, 0, 0);
-    glutSolidCube(1);
-    glPopMatrix();
-
-    glLoadIdentity();
-    glPushMatrix();
-    glFlush();
-    glPopMatrix();
-    */
-
-    glPushMatrix();
-    glBindTexture(GL_TEXTURE_2D, textureBarn);
+    glMatrixMode(GL_MODELVIEW);
+    glBindTexture(GL_TEXTURE_2D, textureHay);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glPushMatrix();
+    
 
     glTranslatef(1, -.6, -3.0);
     glRotatef(angle, 0.0, 1.0, 0.0);
-    glutSolidCube(.3);
+    glScalef(1, .3, .5);
+    glutSolidCube(.4);
+
+    glPopMatrix();
+    */
+
+    
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, textureHay);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTranslatef(1, -.6, -3.0);
+    glRotatef(angle, 0.0, 1.0, 0.0);
+
+    
+    // front wall
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 1.0, 0.1);  glVertex3f(.5, 0, 0);
+    glTexCoord3f(2.0, 1.0, 0.1);  glVertex3f(0, 0, 0);
+    glTexCoord3f(2.0, 0.0, 0.1);  glVertex3f(0, -.5, 0);
+    glTexCoord3f(0.0, 0.0, 0.1);  glVertex3f(.5, -.5, 0);
     glEnd();
+    
+
+    // right wall
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 1.0, 1);    glVertex3f(.5, 0, 0);
+    glTexCoord3f(2.0, 1.0, -1);   glVertex3f(.5, 0, -.5);
+    glTexCoord3f(2.0, 0.0, -1);   glVertex3f(.5, -.5, -.5);
+    glTexCoord3f(0.0, 0.0, 1);    glVertex3f(.5, -.5, 0);
+    glEnd();
+
+    // left wall
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 1.0, 1);    glVertex3f(0, 0, 0);
+    glTexCoord3f(2.0, 1.0, -1);   glVertex3f(0, 0, -.5);
+    glTexCoord3f(2.0, 0.0, -1);   glVertex3f(0, -.5, -.5);
+    glTexCoord3f(0.0, 0.0, 1);    glVertex3f(0, -.5, 0);
+    glEnd();
+
+    // back wall
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 1.0, 1);    glVertex3f(.5, 0, -.5);
+    glTexCoord3f(2.0, 1.0, -1);   glVertex3f(0, 0, -.5);
+    glTexCoord3f(2.0, 0.0, -1);   glVertex3f(0, -.5, -.5);
+    glTexCoord3f(0.0, 0.0, 1);    glVertex3f(.5, -.5, -.5);
+    glEnd();
+
+    // top
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 1.0, 1);    glVertex3f(.5, 0, 0);
+    glTexCoord3f(2.0, 1.0, -1);   glVertex3f(0, 0, -.5);
+    glTexCoord3f(2.0, 0.0, -1);   glVertex3f(0, 0, 0);
+    glTexCoord3f(0.0, 0.0, 1);    glVertex3f(.5, 0, -.5);
+    glEnd();
+
+
     glPopMatrix();
 }
 
 void display(void) {
-
+    /* clear window */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
 
@@ -254,7 +302,7 @@ void display(void) {
     drawLeftSide();
     
 
-    drawCart();
+    drawHay();
 
     //glPushMatrix();
     //glutWireCube(1);
@@ -312,7 +360,8 @@ void Initialize() {
     textureWindow = loadTexture(image);
     image = loadBMP("./sky.bmp");
     textureSky = loadTexture(image);
-
+    image = loadBMP("./hay.bmp");
+    textureHay = loadTexture(image);
     delete image;
 }
 
