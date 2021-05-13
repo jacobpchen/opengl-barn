@@ -6,7 +6,10 @@ float angle = 0;
 // variables to save bmp
 GLuint textureBarn, textureDoor, textureGrass, 
        textureRoof, textureWindow, textureSky,
-       textureHay;  
+       textureHay, textureNight;
+
+//
+int state = 1;
 
 void setMaterial(GLfloat ambientR, GLfloat ambientG, GLfloat ambientB,
     GLfloat diffuseR, GLfloat diffuseG, GLfloat diffuseB,
@@ -46,6 +49,23 @@ void drawSky() {
     glTexCoord3f(0.0, 1.0, 0.1);  glVertex3f(-10, 10, 0);
     glTexCoord3f(1.0, 1.0, 0.1);  glVertex3f(10, 10, 0);
     glTexCoord3f(1.0, 0.0, 0.1);  glVertex3f(10, -10, 0);
+    glTexCoord3f(0.0, 0.0, 0.1);  glVertex3f(-10, -10, 0);
+    glEnd();
+    glPopMatrix();
+}
+
+void drawNightSky() {
+    // Sky
+
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, textureNight);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTranslatef(0, 0, -10);
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 2.0, 0.1);  glVertex3f(-10, 10, 0);
+    glTexCoord3f(4.0, 2.0, 0.1);  glVertex3f(10, 10, 0);
+    glTexCoord3f(4.0, 0.0, 0.1);  glVertex3f(10, -10, 0);
     glTexCoord3f(0.0, 0.0, 0.1);  glVertex3f(-10, -10, 0);
     glEnd();
     glPopMatrix();
@@ -217,24 +237,7 @@ void drawLeftSide() {
     glPopMatrix();
 }
 
-void drawHay() {
-    /*
-    glMatrixMode(GL_MODELVIEW);
-    glBindTexture(GL_TEXTURE_2D, textureHay);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glPushMatrix();
-    
-
-    glTranslatef(1, -.6, -3.0);
-    glRotatef(angle, 0.0, 1.0, 0.0);
-    glScalef(1, .3, .5);
-    glutSolidCube(.4);
-
-    glPopMatrix();
-    */
-
-    
+void drawHay() {  
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, textureHay);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -242,7 +245,6 @@ void drawHay() {
     glTranslatef(1, -.6, -3.0);
     glRotatef(angle, 0.0, 1.0, 0.0);
 
-    
     // front wall
     glBegin(GL_QUADS);
     glTexCoord3f(0.0, 1.0, 0.1);  glVertex3f(.5, 0, 0);
@@ -288,7 +290,7 @@ void drawHay() {
     glPopMatrix();
 }
 
-void display(void) {
+void drawSpringBarn() {
     /* clear window */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
@@ -300,30 +302,85 @@ void display(void) {
     drawBackSide();
     drawRightSide();
     drawLeftSide();
-    
-
     drawHay();
 
-    //glPushMatrix();
-    //glutWireCube(1);
-    //glPopMatrix();
-
     glutSwapBuffers();
+
+    glutPostRedisplay();
 }
 
-void rotate(int key, int x, int y) {
+void drawNightBarn() {
+    /* clear window */
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_TEXTURE_2D);
+
+    drawNightSky();
+    drawGrass();
+    drawFrontSide();
+    drawBackSide();
+    drawRightSide();
+    drawLeftSide();
+    drawHay();
+
+    
+
+    glutSwapBuffers();
+
+    glutPostRedisplay();
+}
+
+void mainMenuHandler(int choice) {
+    switch (choice) {
+    case 1:
+        state = 1;
+        break;
+    case 2:
+        state = 2;
+        break;
+    case 3:
+        state = 3;
+        break;
+    case 4:
+        state = 4;
+        break;
+    case 5:
+        state = 5;
+        break;
+    }
+}
+
+
+
+void display(void) {
+
+    //drawSpringBarn();
+    //drawNightBarn();
+
+    if (state == 1)
+        drawSpringBarn();
+    else if (state == 2)
+        drawNightBarn();
+    else
+        drawSpringBarn();
+
+
+
+
+}
+
+
+void changeScene(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_RIGHT:
-        angle += 1;
-        if (angle > 360) angle = 0.0;
+        state++;
         break;
     case GLUT_KEY_LEFT:
-        angle -= 1;
-        if (angle > 360) angle = 0.0;
+        state--;
         break;
     }
     glutPostRedisplay();
 }
+
 
 GLuint loadTexture(Image* image) {
     GLuint textureId;
@@ -362,6 +419,8 @@ void Initialize() {
     textureSky = loadTexture(image);
     image = loadBMP("./hay.bmp");
     textureHay = loadTexture(image);
+    image = loadBMP("./night.bmp");
+    textureNight = loadTexture(image);
     delete image;
 }
 
@@ -374,7 +433,7 @@ int main(int argc, char** argv) {
     glEnable(GL_DEPTH_TEST);
 
     glutReshapeFunc(resize);
-    glutSpecialFunc(rotate);
+    //glutSpecialFunc(changeScene);
     glutDisplayFunc(display);
     Initialize();
 
@@ -391,6 +450,11 @@ int main(int argc, char** argv) {
     glClearColor(0.1, 0.1, 0.1, 1);
     glViewport(0, 0, 500, 500);
 
+    glutCreateMenu(mainMenuHandler);
+    glutAddMenuEntry("Spring Barn", 1);
+    glutAddMenuEntry("Night Barn", 2);
+    glutAddMenuEntry("Exit", 6);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 
     glutMainLoop();
 
