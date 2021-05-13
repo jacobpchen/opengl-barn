@@ -1,12 +1,15 @@
 #include <stdlib.h>
 #include <GL/glut.h>
+
+
 #include "imageloader.h"
 
 float angle = 0;
 // variables to save bmp
 GLuint textureBarn, textureDoor, textureGrass, 
        textureRoof, textureWindow, textureSky,
-       textureHay, textureNight;
+       textureHay, textureNight, textureSnowfall,
+       textureSnowGround;
 
 //
 int state = 1;
@@ -67,6 +70,40 @@ void drawNightSky() {
     glTexCoord3f(4.0, 2.0, 0.1);  glVertex3f(10, 10, 0);
     glTexCoord3f(4.0, 0.0, 0.1);  glVertex3f(10, -10, 0);
     glTexCoord3f(0.0, 0.0, 0.1);  glVertex3f(-10, -10, 0);
+    glEnd();
+    glPopMatrix();
+}
+
+void drawSnowfall() {
+    // Sky
+
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, textureSnowfall);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTranslatef(0, 0, -10);
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 2.0, 0.1);  glVertex3f(-10, 10, 0);
+    glTexCoord3f(4.0, 2.0, 0.1);  glVertex3f(10, 10, 0);
+    glTexCoord3f(4.0, 0.0, 0.1);  glVertex3f(10, -10, 0);
+    glTexCoord3f(0.0, 0.0, 0.1);  glVertex3f(-10, -10, 0);
+    glEnd();
+    glPopMatrix();
+}
+
+void drawSnowGround() {
+    // Grass
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, textureSnowGround);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTranslatef(0, 0, -6);
+    glRotatef(angle, 0.0, 1.0, 0.0);
+    glBegin(GL_QUADS);
+    glTexCoord3f(0.0, 2.0, 1);  glVertex3f(-50, -1.5, 50);
+    glTexCoord3f(4.0, 2.0, -1);  glVertex3f(-50, -1.5, -50);
+    glTexCoord3f(4.0, 0.0, -1);  glVertex3f(50, -1.5, -50);
+    glTexCoord3f(0.0, 0.0, 1);  glVertex3f(50, -1.5, 50);
     glEnd();
     glPopMatrix();
 }
@@ -322,12 +359,30 @@ void drawNightBarn() {
     drawLeftSide();
     drawHay();
 
-    
+    glutSwapBuffers();
+
+    glutPostRedisplay();
+}
+
+void drawSnowBarn() {
+    /* clear window */
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_TEXTURE_2D);
+
+    drawSnowfall();
+    drawSnowGround();
+    drawFrontSide();
+    drawBackSide();
+    drawRightSide();
+    drawLeftSide();
+    drawHay();
 
     glutSwapBuffers();
 
     glutPostRedisplay();
 }
+
+
 
 void mainMenuHandler(int choice) {
     switch (choice) {
@@ -360,15 +415,14 @@ void display(void) {
         drawSpringBarn();
     else if (state == 2)
         drawNightBarn();
+    else if (state == 3)
+        drawSnowBarn();
     else
         drawSpringBarn();
 
-
-
-
 }
 
-
+/*
 void changeScene(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_RIGHT:
@@ -380,6 +434,7 @@ void changeScene(int key, int x, int y) {
     }
     glutPostRedisplay();
 }
+*/
 
 
 GLuint loadTexture(Image* image) {
@@ -421,6 +476,9 @@ void Initialize() {
     textureHay = loadTexture(image);
     image = loadBMP("./night.bmp");
     textureNight = loadTexture(image);
+    image = loadBMP("./snowfall.bmp");
+    textureSnowfall = loadTexture(image);
+
     delete image;
 }
 
@@ -453,6 +511,7 @@ int main(int argc, char** argv) {
     glutCreateMenu(mainMenuHandler);
     glutAddMenuEntry("Spring Barn", 1);
     glutAddMenuEntry("Night Barn", 2);
+    glutAddMenuEntry("Snow Barn", 3);
     glutAddMenuEntry("Exit", 6);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
