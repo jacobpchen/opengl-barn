@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <GL/glut.h>
-
-
+#include <windows.h>
 #include "imageloader.h"
+
+using namespace std;
 
 float angle = 0;
 // variables to save bmp
@@ -328,6 +329,7 @@ void drawHay() {
 }
 
 void drawSpringBarn() {
+    PlaySound(NULL, 0, 0);
     /* clear window */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
@@ -361,7 +363,9 @@ void drawNightBarn() {
 
     glutSwapBuffers();
 
+    
     glutPostRedisplay();
+    PlaySound(TEXT("star.wav"), NULL, SND_ASYNC);
 }
 
 void drawSnowBarn() {
@@ -379,12 +383,15 @@ void drawSnowBarn() {
 
     glutSwapBuffers();
 
+    PlaySound(TEXT("snow.wav"), NULL, SND_ASYNC);
     glutPostRedisplay();
+
 }
 
 
 
 void mainMenuHandler(int choice) {
+    //PlaySound(NULL, 0, 0);
     switch (choice) {
     case 1:
         state = 1;
